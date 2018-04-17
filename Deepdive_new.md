@@ -2946,16 +2946,15 @@ DeepDive允许关系和列可以被任意数量的`@name(arguments)`格式的标
 
 DDlog中标记的一个主要应用是用来搜索，Mindbender支持DeepDive项目中的所有数据的全文搜索。其后台是[Elasticsearch](https://baike.baidu.com/item/elasticsearch/3411206?fr=aladdin)引擎,DDlog中的标记指示了存储在关系数据库中的DeepDive数据怎样输出转换为Elasticsearch中的文档模型。
 
-###### `@extraction([label])` relations
+###### `@extraction([label])` 标记关系
 
+存储被抽取出的数据的关系，应该带有`@extraction`标记。在搜索界面中，抽取的关系被看作是一个搜索的类型，而其中的每一组数据都看作是一个搜索结果的单位。如果有多个抽取关系之间用`@reference`标记链接，那么只要最主要的关系带有这个标记就行。比如说：`company_mention`、`has-transaction`和`transaction_feature`都是抽取关系，但是只要`person_mention`和`has_transaction`带有`@extraction`标记就行了，因为`transaction_feature`中包含了与`has_spouse`相关的额外信息。
 
-A relation that holds extracted data can be annotated as `@extraction` with an optional label. In the search interface, `@extraction` relation becomes a searchable "type" and every tuple of it becomes the unit of search results. If an extraction is represented by many DDlog relations all associated through `@references`, only the primary relation needs such annotation, e.g., only `person_mention` and `has_spouse` need `@extraction` because `spouse_feature` holds extra/auxiliary information related to `has_spouse`.
-
-###### `@searchable([relation, ...])` columns
+###### `@searchable([relation, ...])` 标记列
 
 Any column annotated with `@searchable` that's directly or indirectly associated with an `@extraction` relation (or a relation that corresponds to a searchable type) is indexed for searching and appears in the result highlighted. Optionally, names of the `@extraction` relations can be specified as arguments to limit the search indexes the column participates in.
 
-###### `@source([label])` relations
+###### `@source([label])` 标记关系
 
 A relation that holds the input/source data to DeepDive should be annotated as `@source` with optional label. The `@source` relations themselves become a searchable type in the search interface as well. Every `@extraction` relation is supposed to record its provenance in column(s) that `@references` one of the `@source` relations. There are two reasons why `@source` relations are explicitly annotated. First, since the typically larger `@source` relations may change less frequently than the `@extraction`s derived from them as the DeepDive application evolves, we can avoid reindexing a large part of the data that stays mostly invariant. Specifically, Elasticsearch's parent-child mapping is used to decouple the frequently changing `@extraction`s from their `@source`s. Second, given how the searchable data to be indexed is determined from the annotations, `@source` relations provide natural breaking points while following the association links between relations. In other words, because independent `@extraction`s can reference a `@source` relation as its provenance, to make each `@extraction` searchable, we may end up collecting data for all other `@extraction`s from the same `@source`.
 
