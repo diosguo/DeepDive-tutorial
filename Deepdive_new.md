@@ -2940,14 +2940,14 @@ DeepDive允许关系和列可以被任意数量的`@name(arguments)`格式的标
 
 ###### 用`@references(relation, [column], [alias])`标记列
 
-如果在一个关系中的某些列是使用的另一个关系中的某个键值，那么这个列就可以是所有`@references`标记。如果目标关系中，有多个`@key`标记的话，那么这里需要添加列名这个参数了。
-Columns whose value references another relation's key can be annotated with `@references` with the target relation name as a relation argument. When more than one column forms a key for the target relation, the target column name to which the annotated column refers should also be passed as an extra column argument. When a relation references the same relation more than one time that is typical for homogeneous relationships, e.g., `has_spouse` referring to `person_mention`twice, an extra alias argument can be provided for clarity. If the target relation has multiple `@key` columns, the alias argument must be specified to distinguish exactly which `@key`column in the target relation the annotated column refers to. In such case, the `@references` columns with the same alias argument as a whole tells to which tuple in the target relation it's referring.
+如果在一个关系中的某些列是使用的另一个关系中的某个键值，那么这个列就可以是所有`@references`标记。如果目标关系中，有多个`@key`标记的话，那么这里需要添加列名这个参数了。而如果在一个关系中，有多个列同时引用了同一个关系中的同一组数据,可以通过`alias`参数给他们一个相同的别名，来表示是同一次引用的多列数据。
 
-##### Annotation for extractions and search
+##### 标记为抽取或者可搜索
 
-One of the main consumers of DDlog annotations is the search interface. It enables full-text search over the data products of DeepDive applications as well as their input data. Elasticsearch is used in the backend, and the DDlog annotations dictate how the data produced by DeepDive stored in a relational database should be unloaded and transformed into Elasticsearch's document model to answer typical keyword and aggregate queries.
+DDlog中标记的一个主要应用是用来搜索，Mindbender支持DeepDive项目中的所有数据的全文搜索。其后台是[Elasticsearch](https://baike.baidu.com/item/elasticsearch/3411206?fr=aladdin)引擎,DDlog中的标记指示了存储在关系数据库中的DeepDive数据怎样输出转换为Elasticsearch中的文档模型。
 
 ###### `@extraction([label])` relations
+
 
 A relation that holds extracted data can be annotated as `@extraction` with an optional label. In the search interface, `@extraction` relation becomes a searchable "type" and every tuple of it becomes the unit of search results. If an extraction is represented by many DDlog relations all associated through `@references`, only the primary relation needs such annotation, e.g., only `person_mention` and `has_spouse` need `@extraction` because `spouse_feature` holds extra/auxiliary information related to `has_spouse`.
 
