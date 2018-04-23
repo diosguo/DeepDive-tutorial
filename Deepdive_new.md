@@ -2710,15 +2710,15 @@ deepdive env python udf/fn.py
 
 这样执行的话，程序会接受`TSJ`格式每一行标准输入，并在标准输出中，输出对应格式的`TSJ`行，当然也会显示错误信息（包括要显示的Log信息），此时就像调试一个普通的Python程序一样了。
 
-### 2.3.2 Calibration调校
+#### 2.3.2 Calibration调校
 
 DeepDive的一个重要特性就是他的迭代是工作流，在执行了**概率推理**过程后，评估结果并且反馈到系统中来提高准确率是十分重要的，所以DeepDive提供了**校准图**来帮助我们完成这个过程。
 
-#### 定义一个Holdout集 Defining a holdout set
+##### 定义一个Holdout集 Defining a holdout set
 
 为了最大限度地利用校准功能，用户需要定义一个**Holdout比例（holdout fraction)**或者一个用户定义的**Holdout查询**来把一部分的证明数据作为训练数据。DeepDive使用Holdout变量来估计其准确率，默认是不是用的Holdout的。
 
-##### Holdout 比例
+###### Holdout 比例
 
 当在`deepdive.conf`文件中定义了`holdout_fraction`，DeepDive会在证据数据（已经被打标的数据）中随机抽取指定比例的变量作为训练数据。其定义如下：
 
@@ -2727,7 +2727,7 @@ deepdive.calibration.holdout_fraction: 0.25
 
 ```
 
-##### 自定义 Holdout 查询
+###### 自定义 Holdout 查询
 
 DeepDive也提供了使用SQL查询定义Holdout数据的功能，要将使用的数据插入的`dd_graph_variables_holdout`表中，而且必须插入`dd_id`列。
 
@@ -2744,7 +2744,7 @@ deepdive.calibration.holdout_query: """
 
 如果定义了`holdout_query`的话，那么将会忽略`holdout_fraction`的定义。
 
-#### 检查概率和权重
+##### 检查概率和权重
 
 为了提高预测的准确性，检查每个变量的概率和节点的权重有很大作用。DeepDive在数据库中创建了叫做`dd_inference_result_weights_mapping`的视图，其中存储的是按照绝对值排序的权重和因子名字。这个视图的Schema如下：
 
@@ -2770,7 +2770,7 @@ View "public.dd_inference_result_weights_mapping"
 - **description**: 权重的说明，其格式为：[推理规则的名字]-[在推理中设定的权重值]
 - **weight**: 学习出的权重值
 
-##### 校准的数据和图
+###### 校准的数据和图
 
 执行下面命令，可以让DeepDive为每个在模型中定义的**变量关系**生成校准用的数据文件。
 
@@ -2808,7 +2808,7 @@ run/model/calibration-plots/[variable_name].png
 
 ![A calibration plot from the spouse example](http://deepdive.stanford.edu/images/spouse/has_spouse.png)
 
-##### 如何理解校准图
+###### 如何理解校准图
 
 下面介绍校准图文件中的三个图的意思：
 
@@ -2818,7 +2818,7 @@ run/model/calibration-plots/[variable_name].png
 
 **注意**：如果你单纯地按照本教程地第一部分的例子来做，可能你会得不到这些校准数据，你还需要按照前面说的，在`deepdive.conf`文件中设置Holdout数据。
 
-##### 校准数据的作用
+###### 校准数据的作用
 
 根据校准数据我们可以了解当前系统的性能，并且根据其特点找到性能不好的缺陷在哪里，主要有以下几种:
 
@@ -2828,14 +2828,16 @@ run/model/calibration-plots/[variable_name].png
 - **Weight learning does not converge:** 如果你的预测结果看起来是一团糟，额，查看日志文件中的梯度值是不是很大（1000+），如果是的话，那么要恭喜你了，权重训练没有收敛，解决办法就是增加迭代次数并减小学习率。
 - **Weight learning converges to a local optimum:** 如果权重没有收敛到全局最优，你可以尝试增加学习率，使用慢衰减，具体看看DimmWitted采样的内容：[DimmWitted sampler documentation](http://deepdive.stanford.edu/sampler)。
 
-#### 召回误差
+##### 召回误差
 
 召回率（Recall）在信息检索中又可以称为查全率，是检索出的相关信息量占系统中相关信息总量的比例。其误差主要来源于两个方面：
 
 - **Event candidates are not recognized in the text.** 在这种情况下，就是没有为特定事件创建变量，而且你在校准图中根本发现不了。比如说，我们的文本中有个“冻北达学”或者“东北大 学”这类的内容，我们很难把`东北大学`这个实体识别出来，因为其中的拼写错误，英文中还存在大小写的问题。除非有一个超全的数据库，然而这不现实。
 - **Events fall below a confidence cutoff.** 如果我们只对大概率事件感兴趣，那么校准图的中间部分就应该看作是召回误差。比如说，我们认为在可信度为90%以上的公司为正确的识别结果，那么在90%以下的公司的缺失，就会产生召回误差。
 
-### 使用Mindbender浏览DeepDive数据。
+## 3 进阶操作
+
+### 3.1 使用Mindbender浏览DeepDive数据。
 
 这一节介绍如何简单地使用交互式的搜索界面来浏览DeepDive的输入数据以及它产生的数据。在此之前，你的DeepDive应用必须要像前面说的那样，在DDlog中写好。
 
@@ -2956,11 +2958,12 @@ DDlog中标记的一个主要应用是用来搜索，Mindbender支持DeepDive项
 
 ###### `@source([label])` 标记关系
 
-A relation that holds the input/source data to DeepDive should be annotated as `@source` with optional label. The `@source` relations themselves become a searchable type in the search interface as well. Every `@extraction` relation is supposed to record its provenance in column(s) that `@references` one of the `@source` relations. There are two reasons why `@source` relations are explicitly annotated. First, since the typically larger `@source` relations may change less frequently than the `@extraction`s derived from them as the DeepDive application evolves, we can avoid reindexing a large part of the data that stays mostly invariant. Specifically, Elasticsearch's parent-child mapping is used to decouple the frequently changing `@extraction`s from their `@source`s. Second, given how the searchable data to be indexed is determined from the annotations, `@source` relations provide natural breaking points while following the association links between relations. In other words, because independent `@extraction`s can reference a `@source` relation as its provenance, to make each `@extraction` searchable, we may end up collecting data for all other `@extraction`s from the same `@source`.
+用来保存输入数据的关系，应该被`@source`标记，还可以带有可选的`label`参数。这个关系同样会在搜索界面成为一个可选的搜索类型。每个`@extraction`关系都会记录其中的某些带有`@reference`标记的数据的来源（这个来源就应该是带有`@source`的关系）。
 
-##### Annotation for aggregation / faceted search
+##### 用于聚合的标记 / 分面检索
 
-###### `@navigable([relation, ...])` columns
+###### `@navigable([relation, ...])` 标记列
+
 
 Similar to `@searchable`, any column annotated with `@navigable` that's directly or indirectly associated with a relation that corresponds to a searchable type is indexed for faceted navigation. Upon every search, handful of significant terms or value ranges found for the column will appear with their approximate counts to help narrowing down the search result. For example, if `label` column is annotated as `@navigable`, every search result will show how many were distantly supervised as positive and negative examples among the result and quickly drill down to them.
 
@@ -3063,7 +3066,7 @@ angular.module "mindbender.extensions", [
 
 
 
-### Labeling DeepDive data with Mindtagger
+### 3.2 使用Mindtagger标记DeepDive数据
 
 This document describes a common data labeling task one has to perform while developing DeepDive applications and introduces a graphical user interface tool dedicated for accelerating such task. In this document we use the terms annotating, marking, and tagging data interchangeably with labeling data.
 
@@ -3377,7 +3380,7 @@ Now, the user can see all the features next to their learned weights shown below
 
 
 
-### Monitoring statistics of DeepDive data with Dashboard
+### 3.3 使用Dashboard监视DeepDive的统计数据
 
 *Dashboard* serves as an interface for viewing and analyzing the results of your DeepDive application runs. It provides a structure to organize various report templates that compute app-specific metrics and snapshot of reports produced after each run.
 
@@ -3765,7 +3768,7 @@ Suppose a line in the snapshot configuration refers to report template `variable
    ```
    reports/
    ```
-
+  
     
 
    of the snapshot, e.g.,
@@ -3893,7 +3896,7 @@ report variable              variable=has_spouse.is_correct top_positive=10 top_
 
 Furthermore, when more templates are added to `variable`, they will also get produced automatically without adding numerous lines for every instantiation of `variable` in the snapshot configuration.
 
-### Utilities for report templates
+##### Utilities for report templates
 
 Several utilities are provided to the executables in report templates to simplify the writing of new report templates.
 
@@ -3963,7 +3966,7 @@ $>
 
 It will produce a table that looks like the following:
 
-> #### 10 Most Frequent Candidates
+> <big>10 Most Frequent Candidates</big>
 >
 > Here are the 10 most frequent candidates extracted by DeepDive:
 >
@@ -4075,11 +4078,11 @@ An example use of the `<chart>` tag is given below:
 ></chart>
 ```
 
-#### Generating negative evidence
+### 3.4 负例的生成
 
-In common relation extraction applications, we often need to generate negative examples in order to train a good system. Without negative examples the system will tend to classify all the variables as positive. However for relation extraction, one cannot easily find enough golden-standard negative examples (ground truth). In this case, we often need to use distant supervision to generate negative examples.
+在一般的关系抽取任务中，为了训练一个较好的系统，我们通常需要生成一些负例。如果没有负例的话，前面调试部分我们也说过，系统的所有判断都会是正值。但是在现实中我们不可能很容易找到很多合适的负例，那么我们就要使用**远程监督（弱监督**的方法来生成一些负例。
 
-Negative evidence generation can be somewhat an art. The following are several common ways to generate negative evidence, while there might be some other ways undiscussed:
+下面将会分别介绍几种生成负例的方法，当然还有一些这里没有提到的方法：
 
 - incompatible relations
 - domain-specific knowledge
@@ -4112,18 +4115,4 @@ For example, most people mention pairs in sentences are not spouses, so we can r
 
 To see an example of how we generate negative evidence in DeepDive, refer to the [example application tutorial](http://deepdive.stanford.edu/example-spouse#1-3-extracting-candidate-relation-mentions).
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-第三部分 CookBook
+# 第三部分 CookBook
