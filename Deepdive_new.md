@@ -2952,9 +2952,7 @@ DDlog中标记的一个主要应用是用来搜索，Mindbender支持DeepDive项
 
 ###### `@searchable([relation, ...])` 标记列
 
-任何一个带有`@searchable`标记的列
-
-Any column annotated with `@searchable` that's directly or indirectly associated with an `@extraction` relation (or a relation that corresponds to a searchable type) is indexed for searching and appears in the result highlighted. Optionally, names of the `@extraction` relations can be specified as arguments to limit the search indexes the column participates in.
+任何一个带有`@searchable`标记的列都直接或间接的和`@extraction`关联，并且为搜索建立索引并在搜索结果中突出显示出来。另外，你还可以在其中带上`@extraction`关系的名字来限制参与索引的列。
 
 ###### `@source([label])` 标记关系
 
