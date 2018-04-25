@@ -4084,7 +4084,7 @@ An example use of the `<chart>` tag is given below:
 
 下面将会分别介绍几种生成负例的方法，当然还有一些这里没有提到的方法：
 
-- incompatible relations
+- incompatible relations  不相容关系
 - domain-specific knowledge
 - random sampling
 
